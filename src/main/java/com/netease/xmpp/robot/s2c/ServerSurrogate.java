@@ -10,7 +10,7 @@
 package com.netease.xmpp.robot.s2c;
 
 import com.netease.xmpp.master.client.ClientConfigCache;
-import com.netease.xmpp.master.common.ServerHashProtos.Server.ServerHash;
+import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class ServerSurrogate {
 
     // Proxy
     private ClientConfigCache clientConfig = null;
-    private List<ServerHash> serverList = new ArrayList<ServerHash>();
+    private List<ServerInfo> serverList = new ArrayList<ServerInfo>();
     private List<ThreadPoolExecutor> threadPoolList = new LinkedList<ThreadPoolExecutor>();
     private Map<String, Integer> threadPoolIndexMap = new HashMap<String, Integer>();
 
@@ -62,27 +62,27 @@ public class ServerSurrogate {
         clientConfig = ClientConfigCache.getInstance();
     }
 
-    private String getKey(ServerHash sh) {
+    private String getKey(ServerInfo sh) {
         StringBuilder sb = new StringBuilder();
         sb.append(sh.getIp());
         sb.append(":");
-        sb.append(sh.getPort());
+        sb.append(sh.getClientPort());
 
         return sb.toString();
     }
 
     public void start() {
         HashSet<String> serverSet = new HashSet<String>();
-        TreeMap<Long, ServerHash> serverNodes = clientConfig.getServerNodes();
-        for (Map.Entry<Long, ServerHash> entry : serverNodes.entrySet()) {
-            ServerHash sh = entry.getValue();
+        TreeMap<Long, ServerInfo> serverNodes = clientConfig.getServerNodes();
+        for (Map.Entry<Long, ServerInfo> entry : serverNodes.entrySet()) {
+            ServerInfo sh = entry.getValue();
             if (serverSet.add(getKey(sh))) {
                 serverList.add(sh);
             }
         }
 
         for (int i = 0; i < serverList.size(); i++) {
-            ServerHash sh = serverList.get(i);
+            ServerInfo sh = serverList.get(i);
             // Create empty thread pool
             ThreadPoolExecutor t = createThreadPool(sh);
             // Populate thread pool with threads that will include connections to the server
@@ -129,19 +129,19 @@ public class ServerSurrogate {
         }
     }
 
-    public void updateServerConnection(TreeMap<Long, ServerHash> invalidServerNodes,
-            TreeMap<Long, ServerHash> addServerNodes) {
+    public void updateServerConnection(TreeMap<Long, ServerInfo> invalidServerNodes,
+            TreeMap<Long, ServerInfo> addServerNodes) {
         // Assume that the server duplicate number is fix number and not changed during runtime
         HashSet<String> serverSet = new HashSet<String>();
-        List<ServerHash> invalidServerList = new ArrayList<ServerHash>();
-        for (Map.Entry<Long, ServerHash> entry : invalidServerNodes.entrySet()) {
-            ServerHash sh = entry.getValue();
+        List<ServerInfo> invalidServerList = new ArrayList<ServerInfo>();
+        for (Map.Entry<Long, ServerInfo> entry : invalidServerNodes.entrySet()) {
+            ServerInfo sh = entry.getValue();
             if (serverSet.add(getKey(sh))) {
                 invalidServerList.add(sh);
             }
         }
 
-        for (ServerHash sh : invalidServerList) {
+        for (ServerInfo sh : invalidServerList) {
             String key = getKey(sh);
             Integer index = threadPoolIndexMap.get(key);
             if (index != null) {
@@ -158,15 +158,15 @@ public class ServerSurrogate {
 
         serverSet.clear();
 
-        List<ServerHash> addServerList = new ArrayList<ServerHash>();
-        for (Map.Entry<Long, ServerHash> entry : addServerNodes.entrySet()) {
-            ServerHash sh = entry.getValue();
+        List<ServerInfo> addServerList = new ArrayList<ServerInfo>();
+        for (Map.Entry<Long, ServerInfo> entry : addServerNodes.entrySet()) {
+            ServerInfo sh = entry.getValue();
             if (serverSet.add(getKey(sh))) {
                 addServerList.add(sh);
             }
         }
 
-        for (ServerHash sh : addServerList) {
+        for (ServerInfo sh : addServerList) {
             serverList.add(sh);
 
             ThreadPoolExecutor t = createThreadPool(sh);
@@ -190,7 +190,7 @@ public class ServerSurrogate {
     public void send(String stanza, String user) {
         long hash = clientConfig.getHashAlgorithm().hash(user);
 
-        ServerHash server = clientConfig.getServerNodeForKey(hash);
+        ServerInfo server = clientConfig.getServerNodeForKey(hash);
         int index = threadPoolIndexMap.get(getKey(server));
         
         threadPoolList.get(index).execute(new RouteTask(user, stanza));
@@ -202,10 +202,10 @@ public class ServerSurrogate {
      * 
      * @param serverHash
      */
-    private ThreadPoolExecutor createThreadPool(ServerHash serverHash) {
+    private ThreadPoolExecutor createThreadPool(ServerInfo serverInfo) {
         // Create a pool of threads that will process queued packets.
         return new ConnectionWorkerThreadPool(1, 1, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(), new ConnectionsWorkerFactory(serverHash),
+                new LinkedBlockingQueue<Runnable>(), new ConnectionsWorkerFactory(serverInfo),
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
@@ -259,19 +259,19 @@ public class ServerSurrogate {
         final ThreadGroup group;
         final AtomicInteger threadNumber = new AtomicInteger(1);
         final AtomicInteger failedAttempts = new AtomicInteger(0);
-        private ServerHash serverHash = null;
+        private ServerInfo serverInfo = null;
 
-        ConnectionsWorkerFactory(ServerHash serverHash) {
+        ConnectionsWorkerFactory(ServerInfo serverHash) {
             SecurityManager s = System.getSecurityManager();
             group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 
-            this.serverHash = serverHash;
+            this.serverInfo = serverHash;
         }
 
         public Thread newThread(Runnable r) {
             // Create new worker thread that will include a connection to the server
             ConnectionWorkerThread t = new ConnectionWorkerThread(group, r, "Connection Worker - "
-                    + threadNumber.getAndIncrement(), 0, serverHash);
+                    + threadNumber.getAndIncrement(), 0, serverInfo);
             if (t.isDaemon())
                 t.setDaemon(false);
             if (t.getPriority() != Thread.NORM_PRIORITY)

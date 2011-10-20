@@ -9,7 +9,7 @@
 
 package com.netease.xmpp.robot.s2c;
 
-import com.netease.xmpp.master.common.ServerHashProtos.Server.ServerHash;
+import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 import com.netease.xmpp.robot.Robot;
 import com.netease.xmpp.robot.c2s.ClientPacketFilter;
 import com.netease.xmpp.robot.c2s.ClientPacketListener;
@@ -30,10 +30,6 @@ import org.jivesoftware.smack.packet.Message;
  */
 public class ConnectionWorkerThread extends Thread {
     private static Logger logger = Logger.getLogger(ConnectionWorkerThread.class);
-    /**
-     * The default XMPP port for connection multiplex.
-     */
-    public static final int DEFAULT_MULTIPLEX_PORT = 5222;
 
     private String robotName;
     private String robotPassword;
@@ -44,14 +40,14 @@ public class ConnectionWorkerThread extends Thread {
      */
     private XMPPConnection connection;
 
-    private ServerHash serverHash;
+    private ServerInfo serverInfo;
 
     public ConnectionWorkerThread(ThreadGroup group, Runnable target, String name, long stackSize,
-            ServerHash serverHash) {
+            ServerInfo serverInfo) {
         super(group, target, name, stackSize);
         this.robotName = Robot.getInstance().getRobotName();
         this.robotPassword = Robot.getInstance().getRobotPassword();
-        this.serverHash = serverHash;
+        this.serverInfo = serverInfo;
         // Create connection to the server
         createConnection();
     }
@@ -83,15 +79,15 @@ public class ConnectionWorkerThread extends Thread {
      * @return true if a connection to the server was established
      */
     private boolean createConnection() {
-        ConnectionConfiguration config = new ConnectionConfiguration(serverHash.getIp(),
-                DEFAULT_MULTIPLEX_PORT);
+        ConnectionConfiguration config = new ConnectionConfiguration(serverInfo.getIp(),
+                serverInfo.getClientPort());
         connection = new XMPPConnection(config);
         try {
             connection.connect();
             connection.login(robotName, robotPassword);
             connection.addPacketListener(new ClientPacketListener(), new ClientPacketFilter());
 
-            System.out.println("CONNECTION DONE: " + serverHash.getIp());
+            System.out.println("CONNECTION DONE: " + serverInfo.getIp() + ":" + serverInfo.getClientPort());
 
             return true;
         } catch (XMPPException e) {
