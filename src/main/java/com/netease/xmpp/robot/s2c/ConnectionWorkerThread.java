@@ -9,6 +9,7 @@
 
 package com.netease.xmpp.robot.s2c;
 
+import com.netease.xmpp.master.client.ClientConfigCache;
 import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 import com.netease.xmpp.robot.Robot;
 import com.netease.xmpp.robot.c2s.ClientPacketFilter;
@@ -34,7 +35,7 @@ public class ConnectionWorkerThread extends Thread {
     private String robotName;
     private String robotPassword;
 
-    private String serverDomain = "blogp23v4.space.163.org";
+    private String serverDomain = null;
     /**
      * Connection to the server.
      */
@@ -48,6 +49,7 @@ public class ConnectionWorkerThread extends Thread {
         this.robotName = Robot.getInstance().getRobotName();
         this.robotPassword = Robot.getInstance().getRobotPassword();
         this.serverInfo = serverInfo;
+        this.serverDomain = ClientConfigCache.getInstance().getXmppDomain();
         // Create connection to the server
         createConnection();
     }
