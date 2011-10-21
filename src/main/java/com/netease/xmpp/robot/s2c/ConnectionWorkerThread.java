@@ -21,6 +21,10 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
 /**
  * Thread that creates and keeps a connection to the server. This thread is responsable for actually
  * forwarding clients traffic to the server. If the connection is no longer active then the thread
@@ -43,6 +47,8 @@ public class ConnectionWorkerThread extends Thread {
 
     private ServerInfo serverInfo;
 
+    private JedisPool jedisPool;
+
     public ConnectionWorkerThread(ThreadGroup group, Runnable target, String name, long stackSize,
             ServerInfo serverInfo) {
         super(group, target, name, stackSize);
@@ -50,6 +56,9 @@ public class ConnectionWorkerThread extends Thread {
         this.robotPassword = Robot.getInstance().getRobotPassword();
         this.serverInfo = serverInfo;
         this.serverDomain = ClientConfigCache.getInstance().getXmppDomain();
+
+        this.jedisPool = new JedisPool(new JedisPoolConfig(), serverInfo.getCacheHost(), serverInfo
+                .getCachePort());
         // Create connection to the server
         createConnection();
     }
@@ -81,15 +90,16 @@ public class ConnectionWorkerThread extends Thread {
      * @return true if a connection to the server was established
      */
     private boolean createConnection() {
-        ConnectionConfiguration config = new ConnectionConfiguration(serverInfo.getIp(),
-                serverInfo.getClientPort());
+        ConnectionConfiguration config = new ConnectionConfiguration(serverInfo.getIp(), serverInfo
+                .getClientPort());
         connection = new XMPPConnection(config);
         try {
             connection.connect();
             connection.login(robotName, robotPassword);
             connection.addPacketListener(new ClientPacketListener(), new ClientPacketFilter());
 
-            System.out.println("CONNECTION DONE: " + serverInfo.getIp() + ":" + serverInfo.getClientPort());
+            System.out.println("CONNECTION DONE: " + serverInfo.getIp() + ":"
+                    + serverInfo.getClientPort());
 
             return true;
         } catch (XMPPException e) {
@@ -132,6 +142,20 @@ public class ConnectionWorkerThread extends Thread {
      */
     public void deliver(String stanza, String user) {
         user = user.replace("@", "\\40");
+
+        Jedis jedis = jedisPool.getResource();
+        String result = null;
+        try {
+            result = jedis.get(user);
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
+
+        if (result == null) {
+            logger.debug("User: " + user + " offline.");
+            return;
+        }
+
         Message message = new Message(user + "@" + serverDomain);
         message.setBody(stanza);
 
