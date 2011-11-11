@@ -19,24 +19,25 @@ import com.netease.xmpp.robot.Robot;
 
 public class ClientPacketListener implements PacketListener {
     private static final String USER_PARA = "user";
-    private String robotUrl = "http://localhost";
 
     private ExecutorService threadPool = Executors.newCachedThreadPool();
 
     class RequestTask implements Runnable {
         private String user = null;
         private String message = null;
+        private String appServerAddr = null;
 
         public RequestTask(String user, String message) {
             this.user = user;
             this.message = message;
+            this.appServerAddr = Robot.getInstance().getAppServerAddr();
         }
 
         @Override
         public void run() {
             HttpClient client = new HttpClient();
             client.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
-            PostMethod method = new PostMethod(robotUrl);
+            PostMethod method = new PostMethod(appServerAddr);
 
             RequestEntity entity;
             try {

@@ -18,13 +18,13 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 public class MessageGate {
     private static MessageGate instance = null;
 
-    private int port = 5000;
+    private int port;
     private ChannelFactory factory = null;
     private Channel serverChannel = null;
 
     public MessageGate(int port) {
         if (instance != null) {
-            throw new IllegalStateException("A robot is already running");
+            throw new IllegalStateException("Message gate is already running");
         }
 
         this.port = port;
@@ -49,7 +49,7 @@ public class MessageGate {
         gateBootstrap.setOptions(config);
         serverChannel = gateBootstrap.bind(new InetSocketAddress(port));
 
-        System.out.println("MSG GATE BINDED AT " + port);
+        System.out.println("Message gate binded at: " + port);
     }
 
     public void stop() {
