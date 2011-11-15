@@ -41,8 +41,6 @@ public class ServerChannelHandler extends SimpleChannelHandler {
         } else if (flag == MessageFlag.FLAG_HASH_ALL_COMPLETE) {
             dispatcher.dispatchEvent(channel, message, EventType.CLIENT_HASH_ALL_COMPLETE);
         } else if(flag == MessageFlag.FLAG_HEATBEAT) {
-            logger.debug("CLIENT - SERVER_HEARTBEAT: " + channel.getRemoteAddress());
-            
             dispatcher.dispatchEvent(channel, null, EventType.CLIENT_SERVER_HEARTBEAT);
         }
     }

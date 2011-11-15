@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.log4j.Logger;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
@@ -18,6 +19,8 @@ import org.jivesoftware.smack.packet.Packet;
 import com.netease.xmpp.robot.Robot;
 
 public class ClientPacketListener implements PacketListener {
+    private static Logger logger = Logger.getLogger(ClientPacketListener.class);
+
     private static final String USER_PARA = "user";
 
     private ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -46,9 +49,11 @@ public class ClientPacketListener implements PacketListener {
                 method.setRequestHeader(USER_PARA, user);
 
                 int statusCode = client.executeMethod(method);
+                logger.debug(">>> Send msg: " + message);
                 if (statusCode == HttpStatus.SC_OK) {
                     String result = method.getResponseBodyAsString();
 
+                    logger.debug(">>> Response: " + result);
                     Robot.getInstance().getServerSurrogate().send(result, user);
                 }
             } catch (UnsupportedEncodingException e) {
@@ -69,7 +74,7 @@ public class ClientPacketListener implements PacketListener {
         user = user.replace("\\40", "@");
         String content = msg.getBody();
 
-        System.out.println("MSG From " + user + ": " + content);
+        logger.debug(">>> Recv msg from: " + user + ": " + content);
 
         threadPool.execute(new RequestTask(user, content));
     }
