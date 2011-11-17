@@ -73,6 +73,7 @@
 		<mkdir dir="${release.dest.dir}/lib"/>
 		<copy todir="${release.dest.dir}/lib">
 			<fileset dir="${dependency.dir}" />
+			<fileset dir="${basedir}/lib" />
         </copy>
 		
 		<jar jarfile="${release.dest.dir}/lib/${jar-robot.file}">
