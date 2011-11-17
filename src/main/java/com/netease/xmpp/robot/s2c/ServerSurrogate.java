@@ -10,6 +10,7 @@
 package com.netease.xmpp.robot.s2c;
 
 import com.netease.xmpp.master.client.ClientConfigCache;
+import com.netease.xmpp.master.client.ClientGlobal;
 import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class ServerSurrogate {
 
     public void start() {
         HashSet<String> serverSet = new HashSet<String>();
-        TreeMap<Long, ServerInfo> serverNodes = clientConfig.getServerNodes();
+        TreeMap<Long, ServerInfo> serverNodes = ClientGlobal.getServerNodes();
         for (Map.Entry<Long, ServerInfo> entry : serverNodes.entrySet()) {
             ServerInfo sh = entry.getValue();
             if (serverSet.add(getKey(sh))) {
@@ -190,7 +191,7 @@ public class ServerSurrogate {
     public void send(String stanza, String user) {
         long hash = clientConfig.getHashAlgorithm().hash(user);
 
-        ServerInfo server = clientConfig.getServerNodeForKey(hash);
+        ServerInfo server = ClientGlobal.getServerNodeForKey(hash);
         int index = threadPoolIndexMap.get(getKey(server));
         
         threadPoolList.get(index).execute(new RouteTask(user, stanza));

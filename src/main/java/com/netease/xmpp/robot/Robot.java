@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.netease.xmpp.master.client.ClientGlobal;
 import com.netease.xmpp.master.client.SyncClient;
 import com.netease.xmpp.robot.s2c.ServerSurrogate;
 import com.netease.xmpp.robot.s2c.gate.MessageGate;
@@ -43,9 +44,9 @@ public class Robot {
 
         instance = this;
 
-        RobotGlobal.setIsRobotStartup(false);
+        ClientGlobal.setIsClientStartup(false);
 
-        robotClient = new SyncClient(SyncClient.CLIENT_TYPE_ROBOT);
+        robotClient = new RobotSyncClient(SyncClient.CLIENT_TYPE_ROBOT);
         robotClient.start();
     }
 
@@ -83,7 +84,7 @@ public class Robot {
         messageGate = new MessageGate(this.gatePort);
         messageGate.start();
 
-        RobotGlobal.setIsRobotStartup(true);
+        ClientGlobal.setIsClientStartup(true);
     }
 
     public ServerSurrogate getServerSurrogate() {
