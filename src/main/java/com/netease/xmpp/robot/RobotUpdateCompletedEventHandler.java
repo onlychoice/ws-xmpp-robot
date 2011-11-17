@@ -21,8 +21,7 @@ public class RobotUpdateCompletedEventHandler extends UpdateCompletedEventHandle
                 Robot.getInstance().start();
             }
 
-            // TODO thread numbers
-            TaskExecutor.getInstance(1).resume();
+            TaskExecutor.getInstance().resume();
         }
     }
 }
