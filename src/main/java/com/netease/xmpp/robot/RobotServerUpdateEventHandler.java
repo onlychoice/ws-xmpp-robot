@@ -19,17 +19,14 @@ public class RobotServerUpdateEventHandler extends ServerUpdateEventHandler {
 
     @Override
     public void serverInfoUpdated(Message message, Server server) {
-        ClientGlobal.setServerVersion(message.getVersion());
-
         List<ServerInfo> serverHashList = server.getServerList();
 
-        TreeMap<Long, ServerInfo> oldServerNodes = ClientGlobal.getServerNodes();
         TreeMap<Long, ServerInfo> newServerNodes = new TreeMap<Long, ServerInfo>();
         TreeMap<Long, ServerInfo> invalidServerNodes = new TreeMap<Long, ServerInfo>();
         TreeMap<Long, ServerInfo> addServerNodes = new TreeMap<Long, ServerInfo>();
 
         int serverFlag = server.getServerFlag();
-
+        TreeMap<Long, ServerInfo> oldServerNodes = ClientGlobal.getServerNodes();
         synchronized (oldServerNodes) {
             if (serverFlag == MessageFlag.FLAG_SERVER_ADD) {
                 // Add server
@@ -58,6 +55,7 @@ public class RobotServerUpdateEventHandler extends ServerUpdateEventHandler {
             }
             
             ClientGlobal.setServerNodes(newServerNodes);
+            ClientGlobal.setServerVersion(message.getVersion());
 
             if (ClientGlobal.getIsClientStarted()) {
                 ServerSurrogate serverSurrogate = Robot.getInstance().getServerSurrogate();
