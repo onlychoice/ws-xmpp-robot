@@ -17,7 +17,7 @@ public class RobotUpdateCompletedEventHandler extends UpdateCompletedEventHandle
 
     private void checkRobotStatus() {
         if (!ClientGlobal.getIsUpdating()) {
-            if (!ClientGlobal.getIsClientStartup()) {
+            if (!ClientGlobal.getIsClientStarted()) {
                 Robot.getInstance().start();
             }
 

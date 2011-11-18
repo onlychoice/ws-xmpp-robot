@@ -44,7 +44,7 @@ public class Robot {
 
         instance = this;
 
-        ClientGlobal.setIsClientStartup(false);
+        ClientGlobal.setIsClientStarted(false);
 
         robotClient = new RobotSyncClient(SyncClient.CLIENT_TYPE_ROBOT);
         robotClient.start();
@@ -84,7 +84,7 @@ public class Robot {
         messageGate = new MessageGate(this.gatePort);
         messageGate.start();
 
-        ClientGlobal.setIsClientStartup(true);
+        ClientGlobal.setIsClientStarted(true);
     }
 
     public ServerSurrogate getServerSurrogate() {
