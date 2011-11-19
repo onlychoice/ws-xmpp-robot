@@ -146,8 +146,8 @@ public class ServerSurrogate {
             String key = getKey(sh);
             Integer index = threadPoolIndexMap.get(key);
             if (index != null) {
-                serverList.remove(index);
-                threadPoolList.remove(index);
+                serverList.remove(index.intValue());
+                threadPoolList.remove(index.intValue());
                 threadPoolIndexMap.remove(key);
                 for (Map.Entry<String, Integer> e : threadPoolIndexMap.entrySet()) {
                     if (e.getValue() > index) {
@@ -188,13 +188,13 @@ public class ServerSurrogate {
      * @param streamID
      *            the stream ID assigned by the connection manager to the session.
      */
-    public void send(String stanza, String user) {
+    public void send(String stanza, String user, boolean check) {
         long hash = clientConfig.getHashAlgorithm().hash(user);
 
         ServerInfo server = ClientGlobal.getServerNodeForKey(hash);
         int index = threadPoolIndexMap.get(getKey(server));
         
-        threadPoolList.get(index).execute(new RouteTask(user, stanza));
+        threadPoolList.get(index).execute(new RouteTask(user, stanza, check));
     }
 
     /**

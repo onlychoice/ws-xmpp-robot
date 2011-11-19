@@ -140,20 +140,22 @@ public class ConnectionWorkerThread extends Thread {
      * @param streamID
      *            the stream ID assigned by the connection manager to the client session.
      */
-    public void deliver(String stanza, String user) {
+    public void deliver(String stanza, String user, boolean check) {
         user = user.replace("@", "\\40");
 
-        Jedis jedis = jedisPool.getResource();
-        String result = null;
-        try {
-            result = jedis.get(user);
-        } finally {
-            jedisPool.returnResource(jedis);
-        }
+        if (check) {
+            Jedis jedis = jedisPool.getResource();
+            String result = null;
+            try {
+                result = jedis.get(user);
+            } finally {
+                jedisPool.returnResource(jedis);
+            }
 
-        if (result == null) {
-            logger.debug("User: " + user + " offline.");
-            return;
+            if (result == null) {
+                logger.debug("User: " + user + " offline.");
+                return;
+            }
         }
 
         Message message = new Message(user + "@" + serverDomain);

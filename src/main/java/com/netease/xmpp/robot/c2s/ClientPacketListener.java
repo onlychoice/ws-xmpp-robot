@@ -54,7 +54,7 @@ public class ClientPacketListener implements PacketListener {
                     String result = method.getResponseBodyAsString();
 
                     logger.debug(">>> Response: " + result);
-                    Robot.getInstance().getServerSurrogate().send(result, user);
+                    Robot.getInstance().getServerSurrogate().send(result, user, false);
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

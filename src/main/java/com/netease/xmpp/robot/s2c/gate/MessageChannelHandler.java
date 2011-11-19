@@ -38,7 +38,7 @@ public class MessageChannelHandler extends SimpleChannelHandler {
 
                 String[] userNameArray = userNameList.split(",");
                 for (String user : userNameArray) {
-                    Robot.getInstance().getServerSurrogate().send(msg, user.trim());
+                    Robot.getInstance().getServerSurrogate().send(msg, user.trim(), true);
                 }
 
                 res = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
