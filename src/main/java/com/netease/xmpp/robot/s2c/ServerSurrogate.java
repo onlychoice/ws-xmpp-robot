@@ -147,7 +147,11 @@ public class ServerSurrogate {
             Integer index = threadPoolIndexMap.get(key);
             if (index != null) {
                 serverList.remove(index.intValue());
+                
+                ThreadPoolExecutor threadPool = threadPoolList.get(index.intValue());
                 threadPoolList.remove(index.intValue());
+                threadPool.shutdown();
+                
                 threadPoolIndexMap.remove(key);
                 for (Map.Entry<String, Integer> e : threadPoolIndexMap.entrySet()) {
                     if (e.getValue() > index) {
