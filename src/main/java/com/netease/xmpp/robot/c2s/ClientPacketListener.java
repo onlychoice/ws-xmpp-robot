@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.StringUtils;
 
 import com.netease.xmpp.robot.Robot;
 
@@ -26,12 +27,15 @@ public class ClientPacketListener implements PacketListener {
     private ExecutorService threadPool = Executors.newCachedThreadPool();
 
     class RequestTask implements Runnable {
+        private String jid = null;
         private String user = null;
         private String message = null;
         private String appServerAddr = null;
 
-        public RequestTask(String user, String message) {
-            this.user = user;
+        public RequestTask(String jid, String message) {
+            this.jid = jid;
+            String user = StringUtils.parseName(jid);
+            this.user = user.replace("\\40", "@");
             this.message = message;
             this.appServerAddr = Robot.getInstance().getAppServerAddr();
         }
@@ -54,7 +58,7 @@ public class ClientPacketListener implements PacketListener {
                     String result = method.getResponseBodyAsString();
 
                     logger.debug(">>> Response: " + result);
-                    Robot.getInstance().getServerSurrogate().send(result, user, false);
+                    Robot.getInstance().getServerSurrogate().send(result, jid, false);
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -70,12 +74,10 @@ public class ClientPacketListener implements PacketListener {
     public void processPacket(Packet packet) {
         Message msg = (Message) packet;
         String jid = msg.getFrom();
-        String user = jid.substring(0, jid.indexOf("@"));
-        user = user.replace("\\40", "@");
         String content = msg.getBody();
 
-        logger.debug(">>> Recv msg from: " + user + ": " + content);
+        logger.debug(">>> Recv msg from: " + jid + ": " + content);
 
-        threadPool.execute(new RequestTask(user, content));
+        threadPool.execute(new RequestTask(jid, content));
     }
 }

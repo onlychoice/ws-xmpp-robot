@@ -141,9 +141,13 @@ public class ConnectionWorkerThread extends Thread {
      *            the stream ID assigned by the connection manager to the client session.
      */
     public void deliver(String stanza, String user, boolean check) {
-        user = user.replace("@", "\\40");
-
         if (check) {
+            // user represent the URS name, if check is false, user is full JID.
+            user = user.replace("@", "\\40");
+            StringBuilder sb = new StringBuilder(user);
+            sb.append("@");
+            sb.append(serverDomain);
+            user = sb.toString();
             Jedis jedis = jedisPool.getResource();
             String result = null;
             try {
@@ -158,7 +162,7 @@ public class ConnectionWorkerThread extends Thread {
             }
         }
 
-        Message message = new Message(user + "@" + serverDomain);
+        Message message = new Message(user);
         message.setBody(stanza);
 
         // Forward the wrapped stanza to the server
