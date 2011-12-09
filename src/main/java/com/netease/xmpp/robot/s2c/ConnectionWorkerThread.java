@@ -9,6 +9,8 @@
 
 package com.netease.xmpp.robot.s2c;
 
+import java.util.Set;
+
 import com.netease.xmpp.master.client.ClientConfigCache;
 import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 import com.netease.xmpp.robot.Robot;
@@ -148,15 +150,16 @@ public class ConnectionWorkerThread extends Thread {
             sb.append("@");
             sb.append(serverDomain);
             user = sb.toString();
+            
             Jedis jedis = jedisPool.getResource();
-            String result = null;
+            Set<String> result = null;
             try {
-                result = jedis.get(user);
+                result = jedis.keys(user + "*");
             } finally {
                 jedisPool.returnResource(jedis);
             }
 
-            if (result == null) {
+            if (result == null || result.size() == 0) {
                 logger.debug("User: " + user + " offline.");
                 return;
             }
