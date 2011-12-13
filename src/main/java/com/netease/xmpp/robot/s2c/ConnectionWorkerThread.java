@@ -145,16 +145,18 @@ public class ConnectionWorkerThread extends Thread {
     public void deliver(String stanza, String user, boolean check) {
         if (check) {
             // user represent the URS name, if check is false, user is full JID.
+            String pattern = user.replaceAll("@", "*"); // used to match the user name
+
             user = user.replace("@", "\\40");
             StringBuilder sb = new StringBuilder(user);
             sb.append("@");
             sb.append(serverDomain);
             user = sb.toString();
-            
+
             Jedis jedis = jedisPool.getResource();
             Set<String> result = null;
             try {
-                result = jedis.keys(user + "*");
+                result = jedis.keys(pattern + "*");
             } finally {
                 jedisPool.returnResource(jedis);
             }

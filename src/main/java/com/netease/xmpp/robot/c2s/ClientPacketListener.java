@@ -2,8 +2,10 @@ package com.netease.xmpp.robot.c2s;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -25,6 +27,9 @@ public class ClientPacketListener implements PacketListener {
     private static final String USER_PARA = "user";
 
     private ExecutorService threadPool = Executors.newCachedThreadPool();
+    
+    private AtomicLong requestNum = new AtomicLong(0);
+    private AtomicLong responseNum = new AtomicLong(0);
 
     class RequestTask implements Runnable {
         private String jid = null;
@@ -55,10 +60,14 @@ public class ClientPacketListener implements PacketListener {
                 int statusCode = client.executeMethod(method);
                 logger.debug(">>> Send msg: " + message);
                 if (statusCode == HttpStatus.SC_OK) {
-                    String result = method.getResponseBodyAsString();
+                    byte[] data = method.getResponseBody();
+
+                    String result = new String(data, Charset.forName("UTF-8"));
 
                     logger.debug(">>> Response: " + result);
                     Robot.getInstance().getServerSurrogate().send(result, jid, false);
+                    
+                    logger.info("Response number: " + responseNum.incrementAndGet());
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -77,6 +86,8 @@ public class ClientPacketListener implements PacketListener {
         String content = msg.getBody();
 
         logger.debug(">>> Recv msg from: " + jid + ": " + content);
+        
+        logger.info("Request number: " + requestNum.incrementAndGet());
 
         threadPool.execute(new RequestTask(jid, content));
     }
