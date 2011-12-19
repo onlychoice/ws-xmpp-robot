@@ -23,6 +23,8 @@ import java.util.TreeMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jivesoftware.smack.packet.PacketExtension;
+
 /**
  * Surrogate of the main server where the Connection Manager is routing client packets. This class
  * is responsible for keeping a pool of working threads to processing incoming clients traffic and
@@ -199,6 +201,24 @@ public class ServerSurrogate {
         int index = threadPoolIndexMap.get(getKey(server));
         
         threadPoolList.get(index).execute(new RouteTask(user, stanza, check));
+    }
+    
+    /**
+     * Forwards the specified stanza to the server. The client that is sending the stanza is
+     * specified by the streamID parameter.
+     * 
+     * @param stanza
+     *            the stanza to send to the server.
+     * @param streamID
+     *            the stream ID assigned by the connection manager to the session.
+     */
+    public void send(PacketExtension extention, String user, boolean check) {
+        long hash = clientConfig.getHashAlgorithm().hash(user);
+
+        ServerInfo server = ClientGlobal.getServerNodeForKey(hash);
+        int index = threadPoolIndexMap.get(getKey(server));
+        
+        threadPoolList.get(index).execute(new RouteTask(user, extention, check));
     }
 
     /**
