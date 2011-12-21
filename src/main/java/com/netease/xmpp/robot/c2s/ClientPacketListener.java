@@ -34,8 +34,8 @@ public class ClientPacketListener implements PacketListener {
     private static final String PARAMS_PREFIX = "<params>";
     private static final String PARAMS_SURFIX = "</params>";
 
-    private static final String DWR_PREFIX = "<dwr xmlns=\"netease:ajax:dwr\">";
-    private static final String DWR_SURFIX = "</dwr>";
+    private static final String DWR_PREFIX = "<dwr xmlns=\"netease:ajax:dwr\"><![CDATA[";
+    private static final String DWR_SURFIX = "]]></dwr>";
 
     /** Default initial size of the response buffer if content length is unknown. */
     private static final int DEFAULT_INITIAL_BUFFER_SIZE = 4 * 1024; // 4 kB
@@ -99,9 +99,6 @@ public class ClientPacketListener implements PacketListener {
 
                 String url = URLDecoder.decode(encodedUrl, "UTF-8");
 
-                System.out.println("Url: " + url);
-                System.out.println("Params: " + params);
-
                 PostMethod method = new PostMethod(url);
                 RequestEntity entity = new StringRequestEntity(params, "text/plain", null);
                 method.setRequestEntity(entity);
@@ -113,7 +110,6 @@ public class ClientPacketListener implements PacketListener {
                     InputStream stream = method.getResponseBodyAsStream();
                     long contentLength = method.getResponseContentLength();
                     String charset = method.getResponseCharSet();
-                    System.out.println("Charset: " + charset);
 
                     ByteArrayOutputStream outstream = new ByteArrayOutputStream(
                             contentLength > 0 ? (int) contentLength : DEFAULT_INITIAL_BUFFER_SIZE);
