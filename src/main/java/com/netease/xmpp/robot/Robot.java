@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import com.netease.xmpp.master.client.ClientGlobal;
 import com.netease.xmpp.master.client.SyncClient;
+import com.netease.xmpp.robot.monitor.TestRequestListener;
 import com.netease.xmpp.robot.s2c.ServerSurrogate;
 import com.netease.xmpp.robot.s2c.gate.MessageGate;
 import com.netease.xmpp.util.ResourceUtils;
@@ -77,6 +78,9 @@ public class Robot {
     }
 
     public void start() {
+        // Make sure listener init properly
+        TestRequestListener.getInstance();
+
         // Open the door
         serverSurrogate = new ServerSurrogate();
         serverSurrogate.start();
@@ -108,6 +112,6 @@ public class Robot {
     }
 
     public static void main(String[] args) throws Exception {
-         new Robot();
+        new Robot();
     }
 }

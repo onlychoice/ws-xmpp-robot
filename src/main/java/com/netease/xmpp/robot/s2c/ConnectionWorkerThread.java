@@ -16,6 +16,7 @@ import com.netease.xmpp.master.common.ServerListProtos.Server.ServerInfo;
 import com.netease.xmpp.robot.Robot;
 import com.netease.xmpp.robot.c2s.ClientPacketFilter;
 import com.netease.xmpp.robot.c2s.ClientPacketListener;
+import com.netease.xmpp.robot.monitor.TestRequestListener;
 
 import org.apache.log4j.Logger;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -173,8 +174,10 @@ public class ConnectionWorkerThread extends Thread {
 
         // Forward the wrapped stanza to the server
         connection.sendPacket(message);
+
+        TestRequestListener.getInstance().onResponse(user, stanza);
     }
-    
+
     public void deliver(PacketExtension extention, String user, boolean check) {
         if (check) {
             // user represent the URS name, if check is false, user is full JID.
@@ -205,5 +208,7 @@ public class ConnectionWorkerThread extends Thread {
 
         // Forward the wrapped stanza to the server
         connection.sendPacket(message);
+
+        TestRequestListener.getInstance().onResponse(user, extention.toXML());
     }
 }
