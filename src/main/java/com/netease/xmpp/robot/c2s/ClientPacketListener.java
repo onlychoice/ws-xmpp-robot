@@ -33,6 +33,7 @@ public class ClientPacketListener implements PacketListener {
     private static Logger logger = Logger.getLogger(ClientPacketListener.class);
 
     private static final String USER_PARA = "x_auth_username";
+    private static final String TEST_USER_PARA = "user";
 
     private static final String URL_PREFIX = "<url>";
     private static final String URL_SURFIX = "</url>";
@@ -188,7 +189,7 @@ public class ClientPacketListener implements PacketListener {
             try {
                 entity = new StringRequestEntity(message, "text/html;charset=GBK", "GBK");
                 method.setRequestEntity(entity);
-                method.setRequestHeader(USER_PARA, user);
+                method.setRequestHeader(TEST_USER_PARA, user);
 
                 int statusCode = client.executeMethod(method);
                 if (statusCode == HttpStatus.SC_OK) {
