@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +59,7 @@ public class ClientPacketListener implements PacketListener {
         
         client = new HttpClient(connectionManager);
         
-        threadPool = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 100, 60,
+        threadPool = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 50, 60,
                 TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
