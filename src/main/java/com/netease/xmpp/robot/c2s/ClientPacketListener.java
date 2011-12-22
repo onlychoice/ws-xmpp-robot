@@ -8,6 +8,9 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -44,7 +47,7 @@ public class ClientPacketListener implements PacketListener {
     /** Default initial size of the response buffer if content length is unknown. */
     private static final int DEFAULT_INITIAL_BUFFER_SIZE = 4 * 1024; // 4 kB
 
-    private ExecutorService threadPool = Executors.newCachedThreadPool();
+    private ExecutorService threadPool = null;
 
     private HttpClient client = null;
 
@@ -54,8 +57,11 @@ public class ClientPacketListener implements PacketListener {
         params.setConnectionTimeout(30000);
         params.setDefaultMaxConnectionsPerHost(100);
         connectionManager.setParams(params);
-
+        
         client = new HttpClient(connectionManager);
+        
+        threadPool = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 100, 60,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
     class DWRPacket implements PacketExtension {
