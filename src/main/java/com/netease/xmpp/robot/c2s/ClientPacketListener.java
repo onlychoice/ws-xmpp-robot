@@ -217,6 +217,6 @@ public class ClientPacketListener implements PacketListener {
         String jid = msg.getFrom();
         String content = msg.getBody();
 
-        threadPool.execute(new TestRequestTask(jid, content));
+        threadPool.execute(new RequestTask(jid, content));
     }
 }

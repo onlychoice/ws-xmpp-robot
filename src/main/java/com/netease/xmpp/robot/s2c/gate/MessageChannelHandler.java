@@ -33,9 +33,11 @@ public class MessageChannelHandler extends SimpleChannelHandler {
             try {
                 String userNameList = URLDecoder.decode(buf[0].substring(buf[0].indexOf(USER_PARA)
                         + USER_PARA.length() + 1), "UTF-8");
-                String msg = URLDecoder.decode(buf[1].substring(buf[0].indexOf(MSG_PARA)
+                String msg = URLDecoder.decode(buf[1].substring(buf[1].indexOf(MSG_PARA)
                         + MSG_PARA.length() + 1), "UTF-8");
 
+                System.out.println("user: " + userNameList + ", message: " + msg);
+                
                 String[] userNameArray = userNameList.split(",");
                 for (String user : userNameArray) {
                     Robot.getInstance().getServerSurrogate().send(msg, user.trim(), true);

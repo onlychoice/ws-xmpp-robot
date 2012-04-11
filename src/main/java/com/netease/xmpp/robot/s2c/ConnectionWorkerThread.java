@@ -164,7 +164,7 @@ public class ConnectionWorkerThread extends Thread {
             }
 
             if (result == null || result.size() == 0) {
-                logger.debug("User: " + user + " offline.");
+                logger.info("User: " + user + " offline.");
                 return;
             }
         }
