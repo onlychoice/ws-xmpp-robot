@@ -1,1 +1,0 @@
-This component function as the proxy for the client and the application server.
