@@ -1,5 +1,6 @@
-ws-xmpp-robot - This component function as the proxy for the client and the application server.
+ws-xmpp-robot
 ===============
+This component function as the proxy for the client and the application server.
 
 Getting Started
 ---------------
